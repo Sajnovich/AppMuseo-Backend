@@ -1,0 +1,9 @@
+# En las pruebas se usa H2 en memoria (modo MySQL), así no hace falta tener MySQL encendido
+spring:
+  datasource:
+    url: jdbc:h2:mem:catalogo;MODE=MySQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop

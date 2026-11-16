@@ -1,0 +1,25 @@
+# MySQL 8 con las tres bases de datos (una por microservicio).
+# Levantar:  docker compose up -d      Detener:  docker compose stop
+# Los datos quedan guardados en el volumen "mysql_datos" aunque se apague el contenedor.
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: appmuseo-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: museo2026
+      TZ: America/Santiago
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./bd/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - mysql_datos:/var/lib/mysql
+    # Docker revisa cada 5 s si MySQL ya acepta conexiones
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-pmuseo2026"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  mysql_datos:

@@ -1,0 +1,22 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: ms-catalogo
+  datasource:
+    # se puede cambiar sin tocar el código con variables de entorno (DB_URL, DB_USER, DB_PASSWORD)
+    url: ${DB_URL:jdbc:mysql://localhost:3306/museo_catalogo?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Santiago}
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:museo2026}
+  jpa:
+    hibernate:
+      ddl-auto: update   # crea/actualiza las tablas a partir de las entidades
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
