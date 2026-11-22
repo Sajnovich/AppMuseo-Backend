@@ -27,6 +27,8 @@
 
     <properties>
         <java.version>17</java.version>
+        <!-- Mockito necesita una versión nueva de Byte Buddy para simular clases cuando se compila con JDK 21/25 -->
+        <byte-buddy.version>1.17.7</byte-buddy.version>
         <springdoc.version>2.6.0</springdoc.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>

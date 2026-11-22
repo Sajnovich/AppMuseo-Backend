@@ -108,7 +108,8 @@ class PedidoServiceTest {
     void siFallaElStockSeDevuelveLoYaDescontado() {
         when(catalogo.buscarProducto(1L)).thenReturn(taza);
         when(catalogo.buscarProducto(2L)).thenReturn(polera);
-        doThrow(new ReglaNegocioException("No hay stock suficiente")).when(catalogo).descontarStock(2L, 2);
+        // lenient: el producto 1 sí se descuenta (con otros argumentos); solo el 2 falla por falta de stock
+        lenient().doThrow(new ReglaNegocioException("No hay stock suficiente")).when(catalogo).descontarStock(2L, 2);
 
         assertThrows(ReglaNegocioException.class, () -> servicio.crear(compra("Región Metropolitana",
                 "Av. Siempre Viva 742", TipoEnvio.ESTANDAR, new ItemRequest(1L, 3), new ItemRequest(2L, 2))));
