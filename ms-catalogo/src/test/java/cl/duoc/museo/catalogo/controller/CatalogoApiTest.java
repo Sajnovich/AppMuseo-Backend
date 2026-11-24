@@ -1,5 +1,6 @@
 package cl.duoc.museo.catalogo.controller;
 
+import cl.duoc.museo.catalogo.seguridad.JwtService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -18,6 +19,13 @@ class CatalogoApiTest {
 
     @Autowired
     private MockMvc mvc;
+
+    @Autowired
+    private JwtService jwt;
+
+    private String bearer(String rol) {
+        return "Bearer " + jwt.emitir(rol.toLowerCase() + "@museo.cl", rol).token();
+    }
 
     @Test
     void listaLosCatorceMuseosDelCaso() throws Exception {
@@ -53,7 +61,8 @@ class CatalogoApiTest {
         String json = """
                 {"nombre":"","descripcion":"x","precio":0,"categoria":"MERCH","stock":1,"pesoKg":1,"codigoBarra":"ABC"}
                 """;
-        mvc.perform(post("/api/productos").contentType(MediaType.APPLICATION_JSON).content(json))
+        mvc.perform(post("/api/productos").header("Authorization", bearer("ADMINISTRADOR"))
+                        .contentType(MediaType.APPLICATION_JSON).content(json))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.campos.nombre").exists())
                 .andExpect(jsonPath("$.campos.precio").exists())
@@ -65,4 +74,41 @@ class CatalogoApiTest {
         mvc.perform(get("/api/productos/999"))
                 .andExpect(status().isNotFound());
     }
+
+    // ---- JWT: permisos por rol ----
+
+    private static final String PRODUCTO = """
+            {"nombre":"Lápiz Museo","descripcion":"Lápiz de grafito con logo","precio":1990,
+             "categoria":"MERCH","stock":50,"pesoKg":0.05,"codigoBarra":"MDM-099"}
+            """;
+
+    @Test
+    void crearProductoSinTokenDa401() throws Exception {
+        mvc.perform(post("/api/productos").contentType(MediaType.APPLICATION_JSON).content(PRODUCTO))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void crearProductoComoClienteDa403() throws Exception {
+        mvc.perform(post("/api/productos").header("Authorization", bearer("CLIENTE"))
+                        .contentType(MediaType.APPLICATION_JSON).content(PRODUCTO))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void elInvestigadorNoPuedeBorrarProductosPeroSiFichasDeMuseo() throws Exception {
+        mvc.perform(delete("/api/productos/1").header("Authorization", bearer("INVESTIGADOR")))
+                .andExpect(status().isForbidden());
+        mvc.perform(put("/api/museos/999").header("Authorization", bearer("INVESTIGADOR"))
+                        .contentType(MediaType.APPLICATION_JSON).content(MUSEO))
+                .andExpect(status().isNotFound());   // pasó la seguridad; el museo 999 no existe
+        mvc.perform(delete("/api/museos/1").header("Authorization", bearer("INVESTIGADOR")))
+                .andExpect(status().isForbidden());  // borrar una ficha publicada es del Administrador
+    }
+
+    private static final String MUSEO = """
+            {"nombre":"Museo de Prueba","pais":"Chile","ciudad":"Santiago","tipo":"Historia",
+             "descripcion":"Ficha creada en la prueba","detalle":"","latitud":-33.44,"longitud":-70.65,
+             "anioLevantamiento":2026,"calificacion":4.5,"resenas":0}
+            """;
 }

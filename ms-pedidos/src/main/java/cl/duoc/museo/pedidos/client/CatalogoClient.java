@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.Map;
 
@@ -21,7 +23,16 @@ public class CatalogoClient {
     private final ObjectMapper json = new ObjectMapper();
 
     public CatalogoClient(RestClient.Builder builder, @Value("${catalogo.url}") String urlCatalogo) {
-        this.http = builder.baseUrl(urlCatalogo).build();
+        // reenvía el token JWT del usuario que hizo la compra: ms-catalogo exige estar autenticado para mover stock
+        this.http = builder.baseUrl(urlCatalogo)
+                .requestInterceptor((peticion, cuerpo, ejecucion) -> {
+                    if (RequestContextHolder.getRequestAttributes() instanceof ServletRequestAttributes atributos) {
+                        String token = atributos.getRequest().getHeader("Authorization");
+                        if (token != null) peticion.getHeaders().set("Authorization", token);
+                    }
+                    return ejecucion.execute(peticion, cuerpo);
+                })
+                .build();
     }
 
     public ProductoCatalogo buscarProducto(Long id) {

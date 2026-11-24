@@ -1,6 +1,7 @@
 package cl.duoc.museo.catalogo.exception;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -15,6 +16,12 @@ import java.util.Map;
 // Captura las excepciones de todos los controladores y las convierte en JSON con el código HTTP correcto
 @RestControllerAdvice
 public class ManejadorErrores {
+
+    // el token es válido, pero el recurso es de otro usuario
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorRespuesta> sinPermiso(AccessDeniedException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorRespuesta.de(403, e.getMessage()));
+    }
 
     @ExceptionHandler(RecursoNoEncontradoException.class)
     public ResponseEntity<ErrorRespuesta> noEncontrado(RecursoNoEncontradoException e) {

@@ -20,3 +20,8 @@ spring:
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+
+# JWT: la misma clave en los tres microservicios (se puede cambiar con la variable de entorno JWT_SECRETO)
+jwt:
+  secreto: ${JWT_SECRETO:AppMuseo-DSY1105-clave-de-firma-JWT-Museo-de-los-Museos-2026}
+  minutos: ${JWT_MINUTOS:120}

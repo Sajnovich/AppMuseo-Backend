@@ -30,6 +30,7 @@
         <!-- Mockito necesita una versión nueva de Byte Buddy para simular clases cuando se compila con JDK 21/25 -->
         <byte-buddy.version>1.17.7</byte-buddy.version>
         <springdoc.version>2.6.0</springdoc.version>
+        <jjwt.version>0.12.6</jjwt.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -59,6 +60,28 @@
             <version>${springdoc.version}</version>
         </dependency>
 
+        <!-- Seguridad: Spring Security + JWT (jjwt) para proteger los endpoints por rol -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>${jjwt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
         <!-- Solo para pruebas: base en memoria, así los tests no necesitan MySQL -->
         <dependency>
             <groupId>com.h2database</groupId>
